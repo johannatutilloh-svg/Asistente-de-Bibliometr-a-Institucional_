@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Privacidad verificable: el navegador bloquea cualquier conexión de red desde esta página. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'none'; form-action 'none'; base-uri 'none'">
+  <meta name="referrer" content="no-referrer">
+  <title>Panel de producción científica</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="css/panel.css">
+  <link rel="stylesheet" href="css/print.css" media="print">
+</head>
+<body>
+  <header class="cabecera">
+    <p class="antetitulo">Bibliometría institucional con Scopus</p>
+    <h1>Panel de producción científica</h1>
+    <p class="estado" id="estado">Ningún dato cargado. Los archivos se leen en este navegador y no se envían a ningún servidor.</p>
+
+    <div class="acciones">
+      <label class="boton boton-principal">
+        Cargar base limpia (.csv)
+        <input type="file" id="archivo-base" accept=".csv,text/csv" class="oculto-accesible">
+      </label>
+      <label class="boton">
+        Cargar registro (.json)
+        <input type="file" id="archivo-registro" accept=".json,application/json" class="oculto-accesible">
+      </label>
+      <button type="button" class="boton-enlace" id="usar-demo">Usar datos de ejemplo</button>
+      <button type="button" class="boton-enlace" id="quitar-datos" hidden>Quitar datos</button>
+    </div>
+    <div id="mensajes" class="mensajes" aria-live="polite"></div>
+  </header>
+
+  <main>
+    <section id="vacio" class="vacio">
+      <h2>Para empezar, cargue la base limpia y su registro</h2>
+      <ol>
+        <li><strong>base_limpia.csv</strong>: la produce el Componente 1 (<code>componente1/limpiar.py</code>) a partir de las exportaciones de Scopus. No contiene nombres de autores.</li>
+        <li><strong>registro.json</strong>: el registro de esa misma ejecución (fecha de descarga, consulta, reglas). Sin él, el informe queda marcado como «sin trazabilidad completa».</li>
+      </ol>
+      <p>¿Solo quiere ver cómo funciona? Use los datos de ejemplo: son ficticios y describen una universidad que no existe.</p>
+    </section>
+
+    <div id="contenido" hidden>
+      <section class="filtros" aria-label="Filtros">
+        <div class="filtro">
+          <h2 class="filtro-titulo" id="f-anios">Años</h2>
+          <div class="fila-anios" role="group" aria-labelledby="f-anios">
+            <select id="anio-desde" aria-label="Desde el año"></select>
+            <span>a</span>
+            <select id="anio-hasta" aria-label="Hasta el año"></select>
+          </div>
+        </div>
+        <div class="filtro">
+          <h2 class="filtro-titulo" id="f-tipos">Tipo de documento</h2>
+          <div class="chips" id="chips-tipos" role="group" aria-labelledby="f-tipos"></div>
+        </div>
+        <div class="filtro">
+          <h2 class="filtro-titulo" id="f-unidades">Unidad académica</h2>
+          <div class="chips" id="chips-unidades" role="group" aria-labelledby="f-unidades"></div>
+        </div>
+        <button type="button" class="boton-enlace" id="restablecer">Restablecer filtros</button>
+      </section>
+
+      <p class="resumen" id="resumen"></p>
+
+      <section class="cifras" id="cifras" aria-label="Cifras principales"></section>
+
+      <div class="rejilla">
+        <section class="bloque">
+          <h2>¿Cómo evoluciona la producción?</h2>
+          <h3>Documentos por año de publicación</h3>
+          <div id="g-docs-anio" class="grafico"></div>
+          <h3>Citas acumuladas por año de publicación</h3>
+          <div id="g-citas-anio" class="grafico"></div>
+          <p class="nota">Los años recientes acumulan menos citas porque han tenido menos tiempo para ser citados.</p>
+          <details><summary>Ver datos por año</summary><div id="t-anio"></div></details>
+        </section>
+
+        <section class="bloque">
+          <h2>¿Con quién colaboramos?</h2>
+          <h3>Países de coautoría (diez principales)</h3>
+          <div id="g-paises"></div>
+          <p class="nota" id="nota-paises"></p>
+        </section>
+
+        <section class="bloque">
+          <h2>¿Dónde publicamos?</h2>
+          <h3>Cuartil SJR de la revista</h3>
+          <div id="g-cuartiles"></div>
+          <p class="nota" id="nota-cuartiles"></p>
+          <h3>Tipo de documento</h3>
+          <div id="g-tipos"></div>
+        </section>
+
+        <section class="bloque">
+          <h2>Fuentes principales</h2>
+          <div class="tabla-desplazable" id="t-fuentes"></div>
+        </section>
+      </div>
+
+      <section class="bloque">
+        <h2>¿Qué aporta cada unidad?</h2>
+        <div class="tabla-desplazable" id="t-unidades"></div>
+        <p class="nota" id="nota-unidades"></p>
+      </section>
+
+      <article class="informe" id="informe" aria-labelledby="titulo-informe">
+        <div class="informe-cabecera">
+          <h2 id="titulo-informe">Informe de producción científica</h2>
+          <button type="button" class="boton" id="imprimir">Imprimir o guardar en PDF</button>
+        </div>
+        <p class="informe-meta" id="informe-meta"></p>
+        <div id="informe-avisos"></div>
+        <div id="informe-cuerpo"></div>
+        <h3>Notas metodológicas</h3>
+        <dl class="notas" id="informe-notas"></dl>
+        <p class="informe-validacion">Antes de compartir este informe, una persona responsable debe leerlo y validarlo.</p>
+      </article>
+    </div>
+  </main>
+
+  <footer class="pie">
+    <p>Los datos se procesan solo en este navegador: la página prohíbe por política de seguridad cualquier conexión de red y no guarda nada al cerrarse. Proyecto final Vibe Coding CEDIA 2026 · subgrupo VC-2026-018-039.</p>
+  </footer>
+  <div class="pie-impresion" id="pie-impresion"></div>
+
+  <script src="js/indicadores.js"></script>
+  <script src="js/graficos.js"></script>
+  <script src="js/informe.js"></script>
+  <script src="js/demo-datos.js"></script>
+  <script src="js/panel.js"></script>
+</body>
+</html>
