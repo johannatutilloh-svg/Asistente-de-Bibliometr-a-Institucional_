@@ -1,0 +1,20 @@
+/* Impresión / PDF con window.print(): sin librerías de PDF. */
+@page { size: A4; margin: 18mm 16mm 20mm; }
+:root {
+  --fondo: #fff; --superficie: #f4f6f8; --tinta: #000; --tenue: #444; --linea: #ccc;
+  --azul: #2b67c0; --azul-oscuro: #1d4f99; --aviso-fondo: #fff5d9; --aviso-borde: #b88a1e; --aviso-tinta: #4d3700;
+  color-scheme: light;
+}
+body { max-width: none; padding: 0; font-size: 10.5pt; background: #fff; color: #000; }
+* { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+.acciones, .filtros, #imprimir, #mensajes, .pie, details, .boton-enlace { display: none !important; }
+.bloque, .cifras, .informe, .tabla tr, .barras-h li { break-inside: avoid; }
+.informe { border: 0; padding: 0; break-before: page; }
+.informe h3 { break-after: avoid; }
+.pie-impresion {
+  display: block; margin-top: 6mm; break-inside: avoid;
+  font: 8pt/1.4 system-ui, sans-serif; color: #444; border-top: 0.5pt solid #bbb; padding-top: 2mm;
+}
+/* «Imprimir o guardar en PDF» desde el informe: solo el informe. */
+body.solo-informe .cabecera, body.solo-informe #contenido > :not(.informe) { display: none !important; }
+body.solo-informe .informe { break-before: auto; }
